@@ -32,15 +32,10 @@ services:
       - PUBMED_EMAIL=${PUBMED_EMAIL}
       - PUBMED_API_KEY=${PUBMED_API_KEY}
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - ./data:/app/data
-    command: >
-      sh -c "
-        echo 'Waiting for Neo4j to be ready...' &&
-        sleep 30 &&
-        python src/database/init_schema.py &&
-        flask run"
+    restart: on-failure
 
 volumes:
   neo4j_data:

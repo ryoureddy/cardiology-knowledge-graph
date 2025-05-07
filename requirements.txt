@@ -1,5 +1,5 @@
 # Core dependencies
-py2neo==2021.2.3
+py2neo==2021.2.4
 pandas==1.5.3
 numpy==1.24.3
 spacy==3.5.3

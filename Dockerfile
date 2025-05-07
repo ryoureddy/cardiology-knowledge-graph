@@ -3,10 +3,14 @@ FROM python:3.9-slim
 # Set working directory
 WORKDIR /app
 
-# Install Neo4j dependencies
+# Install Neo4j dependencies and build tools
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
+    gcc \
+    g++ \
+    make \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies

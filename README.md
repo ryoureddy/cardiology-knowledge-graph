@@ -16,131 +16,129 @@ A knowledge graph system that integrates dual process theory to enhance cardiolo
 
 - Python 3.8 or later
 - Neo4j Desktop (latest version)
-- Cursor IDE (for development)
-- Docker and Docker Compose (optional, for containerized deployment)
+- Docker and Docker Compose (for containerized setup)
 
-### Installation
+### Setup
 
-#### Option 1: Local Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/ryoureddy/cardiology-knowledge-graph.git
-cd cardiology-knowledge-graph
-```
-
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On macOS/Linux
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-python -m spacy download en_core_web_sm
-python -m nltk.downloader punkt stopwords
-```
-
-4. Configure your API credentials:
-   - The project uses a `.env` file for storing API keys and credentials
-   - Edit the `.env` file in the project root with your information:
-```
-# Required for PubMed data acquisition
-PUBMED_EMAIL=your.email@example.com
-PUBMED_API_KEY=your_api_key_here  # Get from https://www.ncbi.nlm.nih.gov/account/settings/
-
-# Neo4j database connection
-NEO4J_URI=bolt://localhost:7687
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=your_database_password
-```
-
-5. Set up Neo4j database:
-   - Install Neo4j Desktop from [https://neo4j.com/download/](https://neo4j.com/download/)
-   - Create a new database named "cardiology" with password as configured in your `.env` file
-   - Install the APOC plugin
-   - Start the database
-
-6. Initialize the database schema:
-```bash
-python src/database/init_schema.py
-```
-
-#### Option 2: Docker Installation
+#### Option 1: Running with Docker (Recommended)
 
 1. Clone the repository:
-```bash
-git clone https://github.com/ryoureddy/cardiology-knowledge-graph.git
-cd cardiology-knowledge-graph
-```
+   ```
+   git clone https://github.com/ryoureddy/cardiology-knowledge-graph.git
+   cd cardiology-knowledge-graph
+   ```
 
-2. Create a `.env` file in the project root with your PubMed API credentials:
-```
-PUBMED_EMAIL=your.email@example.com
-PUBMED_API_KEY=your_api_key_here
-```
+2. Create a `.env` file in the project root with your PubMed API credentials and Neo4j settings:
+   ```
+   # Cardiology Knowledge Graph environment variables
+
+   # NCBI/PubMed API credentials
+   PUBMED_EMAIL=your.email@example.com
+   PUBMED_API_KEY=your_api_key_here
+
+   # Neo4j database connection (these settings are used for local development only)
+   NEO4J_URI=bolt://localhost:7687
+   NEO4J_USER=neo4j
+   NEO4J_PASSWORD=password
+   ```
 
 3. Build and start the containers:
-```bash
-docker-compose up -d
-```
+   ```
+   docker-compose up -d
+   ```
 
-This will:
-- Start a Neo4j container with the APOC plugin installed
-- Build and start the Cardiology Knowledge Graph application
-- Initialize the database schema automatically
+4. Access the application and Neo4j browser:
+   - Cardiology Knowledge Graph: http://localhost:5001/
+   - Neo4j Browser: http://localhost:7474/ (connect with username: neo4j, password: password)
 
-4. Access the application at http://localhost:5000
-5. Access Neo4j Browser at http://localhost:7474 (username: neo4j, password: password)
+#### Option 2: Running Locally
 
-## Project Structure
+1. Clone the repository:
+   ```
+   git clone https://github.com/ryoureddy/cardiology-knowledge-graph.git
+   cd cardiology-knowledge-graph
+   ```
 
-- `src/data_acquisition/`: Modules for acquiring data from PubMed and medical textbooks
-- `src/database/`: Database connection and schema initialization
-- `src/processing/`: NLP and data processing modules
-- `src/visualization/`: Web interface and graph visualization
-- `src/dual_process/`: Implementation of dual process theory views
-- `data/`: Raw and processed data storage
-- `tests/`: Unit and integration tests
+2. Create a virtual environment and install dependencies:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+   pip install -r requirements.txt
+   python -m spacy download en_core_web_sm
+   python -m nltk.downloader punkt stopwords
+   ```
+
+3. Create a `.env` file in the project root with your PubMed API credentials and Neo4j settings:
+   ```
+   # Cardiology Knowledge Graph environment variables
+
+   # NCBI/PubMed API credentials
+   PUBMED_EMAIL=your.email@example.com
+   PUBMED_API_KEY=your_api_key_here
+
+   # Neo4j database connection
+   NEO4J_URI=bolt://localhost:7687
+   NEO4J_USER=neo4j
+   NEO4J_PASSWORD=your_password
+   ```
+
+4. Ensure Neo4j is running and initialize the database schema:
+   ```
+   python src/database/init_schema.py
+   ```
+
+5. Run the Flask application:
+   ```
+   export FLASK_APP=src/visualization/app.py
+   flask run
+   ```
 
 ## Usage
 
-To run the web application after setting up:
+### Data Acquisition
 
-```bash
-# Local installation
-python src/visualization/app.py
+The system automatically fetches cardiology-related data from:
+- PubMed research articles
+- Medical textbooks (currently focusing on openly available cardiology content)
 
-# Docker installation
-# The application starts automatically with docker-compose
+To manually trigger data acquisition:
+```
+python src/data_acquisition/run_acquisition.py
 ```
 
-## Data Acquisition
+### Knowledge Graph Building
 
-To acquire cardiology data from PubMed and free textbooks:
+After data acquisition, the graph is constructed by:
+1. Extracting medical entities (conditions, treatments, etc.)
+2. Identifying relationships between entities
+3. Populating the Neo4j database
 
-```bash
-# Fetch data from PubMed
-python src/data_acquisition/pubmed_fetcher.py
-
-# Fetch data from free textbooks
-python src/data_acquisition/textbook_fetcher.py
+To manually rebuild the knowledge graph:
+```
+python src/database/build_graph.py
 ```
 
-## Building the Knowledge Graph
+### Dual Process Views
 
-After acquiring data, process it and build the knowledge graph:
+The system supports three different views:
+- **Complete View**: Shows the entire knowledge graph
+- **System 1 View**: Focuses on intuitive, pattern-recognition aspects for quick reference
+- **System 2 View**: Highlights analytical, detailed reasoning connections
 
-```bash
-# Extract entities
-python src/processing/entity_extractor.py
+## Project Structure
 
-# Extract relationships
-python src/processing/relationship_extractor.py
-
-# Build knowledge graph in Neo4j
-python src/database/graph_builder.py
+```
+cardiology-knowledge-graph/
+├── data/
+│   ├── raw/             # Raw data from PubMed and textbooks
+│   └── processed/       # Extracted entities and relationships
+├── src/
+│   ├── data_acquisition/  # PubMed and textbook data fetching
+│   ├── processing/        # NLP and entity/relationship extraction
+│   ├── database/          # Neo4j database operations
+│   ├── dual_process/      # System 1 and System 2 view generation
+│   └── visualization/     # Flask web application
+└── requirements.txt
 ```
 
 ## Contributing
