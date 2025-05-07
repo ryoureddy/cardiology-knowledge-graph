@@ -1,0 +1,150 @@
+/* Styles for Cardiology Knowledge Graph web interface */
+
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+/* Navbar styles */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Card styles */
+.card {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    font-weight: 600;
+}
+
+/* Graph visualization styles */
+#complete-graph, #system1-graph, #system2-graph {
+    background-color: #ffffff;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+svg {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Link styles in the knowledge graph */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Entity details styling */
+#entity-name {
+    margin-bottom: 0.25rem;
+}
+
+#entity-type {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+#entity-frequency {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Loading indicators */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+    margin: 1rem auto;
+    display: block;
+}
+
+/* Footer styles */
+.footer {
+    margin-top: 2rem;
+    padding: 1rem 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Search results styling */
+#search-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+
+/* Node and link styling for D3 visualization */
+circle {
+    stroke-width: 1.5px;
+}
+
+line {
+    stroke-opacity: 0.6;
+}
+
+text {
+    font-family: sans-serif;
+    pointer-events: none;
+}
+
+/* Dual process theory view styles */
+.tab-content {
+    padding-top: 1rem;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    #complete-graph, #system1-graph, #system2-graph {
+        height: 400px !important;
+    }
+}
+
+/* System 1 specific colors */
+.system1-high {
+    color: #2ca02c;
+}
+
+.system1-medium {
+    color: #98df8a;
+}
+
+/* System 2 specific colors */
+.system2-high {
+    color: #d62728;
+}
+
+.system2-medium {
+    color: #ff9896;
+} 

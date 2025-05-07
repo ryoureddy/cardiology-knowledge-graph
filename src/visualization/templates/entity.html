@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ entity_name }} - Cardiology Knowledge Graph</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Cardiology Knowledge Graph</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h1 id="entity-name" class="card-title">{{ entity_name }}</h1>
+                        <div id="entity-type" class="badge bg-secondary mb-2"></div>
+                        <div id="entity-frequency" class="mb-2"></div>
+                        <div id="loading-info" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Loading entity information...</p>
+                        </div>
+                        <div id="entity-not-found" class="alert alert-warning" style="display: none;">
+                            Entity not found in the knowledge graph. The database might not have enough data yet.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graph Visualization Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="viewTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="complete-tab" data-bs-toggle="tab" data-bs-target="#complete" type="button" role="tab" aria-controls="complete" aria-selected="true">Complete View</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="system1-tab" data-bs-toggle="tab" data-bs-target="#system1" type="button" role="tab" aria-controls="system1" aria-selected="false">System 1 (Intuitive)</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="system2-tab" data-bs-toggle="tab" data-bs-target="#system2" type="button" role="tab" aria-controls="system2" aria-selected="false">System 2 (Analytical)</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="viewTabsContent">
+                            <div class="tab-pane fade show active" id="complete" role="tabpanel" aria-labelledby="complete-tab">
+                                <div id="complete-loading" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>Loading complete view...</p>
+                                </div>
+                                <div id="complete-graph" style="width: 100%; height: 600px;"></div>
+                            </div>
+                            <div class="tab-pane fade" id="system1" role="tabpanel" aria-labelledby="system1-tab">
+                                <div id="system1-loading" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>Loading System 1 view...</p>
+                                </div>
+                                <div id="system1-graph" style="width: 100%; height: 600px;"></div>
+                                <div class="mt-3">
+                                    <p><strong>System 1 (Intuitive) View:</strong> Shows the most common and high-confidence relationships that are typically recognized immediately by experienced clinicians.</p>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="system2" role="tabpanel" aria-labelledby="system2-tab">
+                                <div id="system2-loading" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>Loading System 2 view...</p>
+                                </div>
+                                <div id="system2-graph" style="width: 100%; height: 600px;"></div>
+                                <div class="mt-3">
+                                    <p><strong>System 2 (Analytical) View:</strong> Shows all relevant relationships, including less common but important connections that require more deliberate analytical thinking.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Entity Details Card -->
+                <div class="card mb-4">
+                    <div class="card-header">Related Entities</div>
+                    <div class="card-body">
+                        <div id="loading-related" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Loading related entities...</p>
+                        </div>
+                        <ul id="related-entities" class="list-group">
+                            <!-- Related entities will appear here -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Sources Card -->
+                <div class="card">
+                    <div class="card-header">Sources</div>
+                    <div class="card-body">
+                        <div id="loading-sources" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Loading sources...</p>
+                        </div>
+                        <ul id="entity-sources" class="list-group">
+                            <!-- Sources will appear here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Cardiology Knowledge Graph &copy; 2023</span>
+        </div>
+    </footer>
+
+    <script>
+        // Entity name from the URL
+        const entityName = "{{ entity_name }}";
+        
+        // Function to load entity information
+        function loadEntityInfo() {
+            fetch(`/api/entity/${encodeURIComponent(entityName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading-info').style.display = 'none';
+                    
+                    if (data.found) {
+                        // Display entity details
+                        document.getElementById('entity-name').textContent = data.name;
+                        document.getElementById('entity-type').textContent = data.type;
+                        document.getElementById('entity-frequency').textContent = `Frequency: ${data.frequency || 'N/A'}`;
+                        
+                        // Display related entities
+                        document.getElementById('loading-related').style.display = 'none';
+                        const relatedEntitiesList = document.getElementById('related-entities');
+                        relatedEntitiesList.innerHTML = '';
+                        
+                        if (data.related_entities && data.related_entities.length > 0) {
+                            data.related_entities.forEach(entity => {
+                                const listItem = document.createElement('li');
+                                listItem.className = 'list-group-item';
+                                listItem.innerHTML = `
+                                    <a href="/entity/${encodeURIComponent(entity.entity_name)}">${entity.entity_name}</a>
+                                    <span class="badge bg-secondary float-end">${entity.entity_type}</span>
+                                    <div><small>${entity.relationship}</small></div>
+                                `;
+                                relatedEntitiesList.appendChild(listItem);
+                            });
+                        } else {
+                            relatedEntitiesList.innerHTML = '<li class="list-group-item">No related entities found</li>';
+                        }
+                        
+                        // Display sources
+                        document.getElementById('loading-sources').style.display = 'none';
+                        const sourcesList = document.getElementById('entity-sources');
+                        sourcesList.innerHTML = '';
+                        
+                        if (data.sources && data.sources.length > 0) {
+                            data.sources.forEach(source => {
+                                const listItem = document.createElement('li');
+                                listItem.className = 'list-group-item';
+                                listItem.innerHTML = `
+                                    <div>${source.source_title}</div>
+                                    <div><small>Type: ${source.source_type}</small></div>
+                                    <div><small>Mentions: ${source.mention_count || 1}</small></div>
+                                `;
+                                sourcesList.appendChild(listItem);
+                            });
+                        } else {
+                            sourcesList.innerHTML = '<li class="list-group-item">No sources found</li>';
+                        }
+                        
+                        // Load graph views
+                        loadGraphView('complete');
+                        
+                        // Set up tab change events to load views when clicked
+                        document.getElementById('system1-tab').addEventListener('click', () => loadGraphView('system1'));
+                        document.getElementById('system2-tab').addEventListener('click', () => loadGraphView('system2'));
+                    } else {
+                        // Entity not found
+                        document.getElementById('entity-not-found').style.display = 'block';
+                        document.getElementById('loading-related').style.display = 'none';
+                        document.getElementById('loading-sources').style.display = 'none';
+                        document.getElementById('complete-loading').style.display = 'none';
+                        document.getElementById('system1-loading').style.display = 'none';
+                        document.getElementById('system2-loading').style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading entity info:', error);
+                    document.getElementById('loading-info').style.display = 'none';
+                    document.getElementById('entity-not-found').style.display = 'block';
+                    document.getElementById('loading-related').style.display = 'none';
+                    document.getElementById('loading-sources').style.display = 'none';
+                });
+        }
+        
+        // Function to load a specific graph view
+        function loadGraphView(viewType) {
+            const loadingElement = document.getElementById(`${viewType}-loading`);
+            const graphElement = document.getElementById(`${viewType}-graph`);
+            
+            if (loadingElement) loadingElement.style.display = 'block';
+            if (graphElement) graphElement.innerHTML = '';
+            
+            fetch(`/api/view/${viewType}/${encodeURIComponent(entityName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (loadingElement) loadingElement.style.display = 'none';
+                    
+                    // Create force-directed graph with D3
+                    createForceGraph(data, graphElement.id);
+                })
+                .catch(error => {
+                    console.error(`Error loading ${viewType} view:`, error);
+                    if (loadingElement) loadingElement.style.display = 'none';
+                    if (graphElement) {
+                        graphElement.innerHTML = `<div class="alert alert-danger">Error loading graph. Please try again.</div>`;
+                    }
+                });
+        }
+        
+        // Function to create a force-directed graph with D3
+        function createForceGraph(data, elementId) {
+            const width = document.getElementById(elementId).clientWidth;
+            const height = 600;
+            
+            // Clear previous graph
+            d3.select(`#${elementId}`).selectAll('*').remove();
+            
+            // Create SVG element
+            const svg = d3.select(`#${elementId}`)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+                
+            // Define color scale for node types
+            const color = d3.scaleOrdinal()
+                .domain(['Condition', 'Anatomy', 'Treatment', 'Diagnostic', 'Finding', 'Procedure', 'Mechanism'])
+                .range(['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#a65628', '#f781bf']);
+                
+            // Define arrow marker for directed edges
+            svg.append('defs').selectAll('marker')
+                .data(['end'])
+                .enter().append('marker')
+                .attr('id', 'arrow')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 25)
+                .attr('refY', 0)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#999');
+                
+            // Create force simulation
+            const simulation = d3.forceSimulation(data.nodes)
+                .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collide', d3.forceCollide().radius(d => 30));
+                
+            // Create links
+            const link = svg.append('g')
+                .selectAll('line')
+                .data(data.links)
+                .enter().append('line')
+                .attr('stroke-width', d => Math.sqrt(d.value))
+                .attr('stroke', d => {
+                    if (data.viewType === 'complete') {
+                        // In complete view, color links based on system1/system2
+                        if (d.system1 && d.system2) return '#5c5cd6'; // Both system1 and system2
+                        if (d.system1) return '#2ca02c'; // System1 only
+                        if (d.system2) return '#d62728'; // System2 only
+                        return '#999'; // Neither
+                    } else if (data.viewType === 'system1') {
+                        // In system1 view, color by strength
+                        if (d.strength === 'high') return '#2ca02c';
+                        if (d.strength === 'medium') return '#98df8a';
+                        return '#c7e9c0';
+                    } else if (data.viewType === 'system2') {
+                        // In system2 view, color by relevance
+                        if (d.relevance === 'high') return '#d62728';
+                        if (d.relevance === 'medium') return '#ff9896';
+                        return '#ffbcbc';
+                    }
+                    return '#999';
+                })
+                .attr('marker-end', 'url(#arrow)');
+                
+            // Create link labels
+            const linkText = svg.append('g')
+                .selectAll('text')
+                .data(data.links)
+                .enter().append('text')
+                .attr('dy', -5)
+                .attr('text-anchor', 'middle')
+                .text(d => d.label)
+                .attr('font-size', '10px')
+                .attr('fill', '#666');
+                
+            // Create nodes
+            const node = svg.append('g')
+                .selectAll('circle')
+                .data(data.nodes)
+                .enter().append('g');
+                
+            // Add circles to nodes
+            node.append('circle')
+                .attr('r', d => d.central ? 15 : 10)
+                .attr('fill', d => color(d.type))
+                .attr('stroke', d => d.central ? '#000' : '#fff')
+                .attr('stroke-width', d => d.central ? 2 : 1);
+                
+            // Add labels to nodes
+            node.append('text')
+                .attr('dx', 15)
+                .attr('dy', 5)
+                .text(d => d.label)
+                .attr('font-size', '12px')
+                .attr('font-weight', d => d.central ? 'bold' : 'normal');
+                
+            // Add drag behavior to nodes
+            node.call(d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended));
+                
+            // Add tooltip behavior
+            node.append('title')
+                .text(d => `${d.label} (${d.type})`);
+                
+            // Update positions on simulation tick
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                    
+                linkText
+                    .attr('x', d => (d.source.x + d.target.x) / 2)
+                    .attr('y', d => (d.source.y + d.target.y) / 2);
+                    
+                node.attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+            
+            // Drag functions
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+            
+            // Add zoom behavior to the SVG
+            svg.call(d3.zoom()
+                .extent([[0, 0], [width, height]])
+                .scaleExtent([0.1, 8])
+                .on('zoom', zoomed));
+                
+            function zoomed(event) {
+                svg.selectAll('g').attr('transform', event.transform);
+            }
+        }
+        
+        // Load entity information when the page loads
+        document.addEventListener('DOMContentLoaded', loadEntityInfo);
+    </script>
+</body>
+</html> 
