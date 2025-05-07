@@ -4,6 +4,16 @@ Database connector module for Neo4j connection management.
 from py2neo import Graph
 import logging
 import os
+from pathlib import Path
+import sys
+from dotenv import load_dotenv
+
+# Add the project root to the path to import modules correctly
+project_root = Path(__file__).parent.parent.parent
+sys.path.append(str(project_root))
+
+# Load environment variables from .env file
+load_dotenv(os.path.join(project_root, '.env'))
 
 # Configure logging
 logging.basicConfig(
@@ -17,7 +27,7 @@ class Neo4jConnector:
     Manages connections to the Neo4j database for the Cardiology Knowledge Graph.
     """
     
-    def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="password"):
+    def __init__(self, uri=None, user=None, password=None):
         """
         Initialize the Neo4j database connector.
         
@@ -26,9 +36,10 @@ class Neo4jConnector:
             user (str): Neo4j username
             password (str): Neo4j password
         """
-        self.uri = uri
-        self.user = user
-        self.password = password
+        # Get connection details from environment variables if not provided
+        self.uri = uri or os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+        self.user = user or os.environ.get("NEO4J_USER", "neo4j")
+        self.password = password or os.environ.get("NEO4J_PASSWORD", "password")
         self.graph = None
         
     def connect(self):
@@ -85,8 +96,4 @@ class Neo4jConnector:
 
 
 # Singleton instance for global use
-connector = Neo4jConnector(
-    uri=os.environ.get("NEO4J_URI", "bolt://localhost:7687"),
-    user=os.environ.get("NEO4J_USER", "neo4j"),
-    password=os.environ.get("NEO4J_PASSWORD", "password")
-) 
+connector = Neo4jConnector() 

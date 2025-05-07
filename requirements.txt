@@ -9,6 +9,7 @@ requests==2.31.0
 PyPDF2==3.0.1
 biopython==1.81
 lxml==4.9.2
+python-dotenv==1.0.0
 
 # NLP dependencies
 nltk==3.8.1

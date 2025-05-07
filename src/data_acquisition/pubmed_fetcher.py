@@ -10,10 +10,14 @@ from urllib.parse import quote_plus
 from Bio import Entrez, Medline
 from pathlib import Path
 import sys
+from dotenv import load_dotenv
 
 # Add the project root to the path to import modules correctly
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
+
+# Load environment variables from .env file
+load_dotenv(os.path.join(project_root, '.env'))
 
 # Configure logging
 logging.basicConfig(
@@ -25,7 +29,7 @@ logger = logging.getLogger(__name__)
 class PubMedFetcher:
     """Class to fetch cardiology articles from PubMed."""
     
-    def __init__(self, email, api_key=None, save_dir="data/raw"):
+    def __init__(self, email=None, api_key=None, save_dir="data/raw"):
         """
         Initialize the PubMed fetcher.
         
@@ -34,13 +38,17 @@ class PubMedFetcher:
             api_key (str, optional): NCBI API key for higher rate limits
             save_dir (str): Directory to save fetched articles
         """
-        self.email = email
-        self.api_key = api_key
+        # Get credentials from environment variables if not provided
+        self.email = email or os.environ.get('PUBMED_EMAIL')
+        self.api_key = api_key or os.environ.get('PUBMED_API_KEY')
+        
+        if not self.email:
+            logger.warning("No email provided for PubMed API. Set PUBMED_EMAIL in .env file or pass as parameter.")
         
         # Set up required properties for NCBI's E-utilities
-        Entrez.email = email
-        if api_key:
-            Entrez.api_key = api_key
+        Entrez.email = self.email
+        if self.api_key:
+            Entrez.api_key = self.api_key
         
         # Set up the save directory
         self.save_dir = os.path.join(project_root, save_dir)
@@ -250,8 +258,8 @@ class PubMedFetcher:
 
 # Example usage
 if __name__ == "__main__":
-    # Set up the fetcher with your email
-    fetcher = PubMedFetcher(email="your.email@example.com")
+    # Set up the fetcher using environment variables
+    fetcher = PubMedFetcher()
     
     # Define cardiology-specific search terms
     cardiology_terms = [

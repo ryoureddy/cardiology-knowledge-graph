@@ -1,0 +1,49 @@
+# Git and version control
+.git
+.gitignore
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Data files (should be mounted as volume)
+data/
+
+# Docker files
+.dockerignore
+docker-compose.yml
+
+# Environment variables
+.env
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Documentation
+docs/
+README.md
+LICENSE
+*.md 
